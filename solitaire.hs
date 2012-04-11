@@ -1,22 +1,54 @@
-import System.Random
+import Shuffle
 
-data Card = Hearts Integer
-          | Spades Integer
-          | Diamonds Integer
-          | Clubs Integer
-            deriving (Show)
+data Rank = Ace | Two | Three | Four | Five | Six | Seven
+          | Eight | Nine | Ten | Jack | Queen | King
+            deriving (Enum, Show, Read, Bounded, Eq, Ord)
 
-fullDeck = [Hearts 1, Hearts 2, Hearts 3, Hearts 4, Hearts 5
-           ,Hearts 6, Hearts 7, Hearts 8, Hearts 9, Hearts 10
-           ,Hearts 11, Hearts 12, Hearts 13
-           ,Spades 1, Spades 2, Spades 3, Spades 4, Spades 5
-           ,Spades 6, Spades 7, Spades 8, Spades 9, Spades 10
-           ,Spades 11, Spades 12, Spades 13
-           ,Diamonds 1, Diamonds 2, Diamonds 3, Diamonds 4
-           ,Diamonds 5, Diamonds 6, Diamonds 7, Diamonds 8
-           ,Diamonds 9, Diamonds 10, Diamonds 11, Diamonds 12
-           ,Diamonds 13
-           ,Clubs 1, Clubs 2, Clubs 3, Clubs 4, Clubs 5, Clubs 6
-           ,Clubs 7, Clubs 8, Clubs 9, Clubs 10, Clubs 11
-           ,Clubs 12, Clubs 13]
+data Suit = Clubs | Diamonds | Hearts | Spades
+            deriving (Enum, Show, Read, Bounded, Eq, Ord)
+
+data Card = Card Suit Rank
+            deriving (Eq, Ord, Bounded)
+
+--{-
+data GameState = GameState { stock :: ([Card], [Card])
+                           , tableaus :: [([Card],[Card])]
+                           , foundations :: [[Card]]
+                           } deriving (Show)
+--}
+
+instance Enum Card where
+    toEnum n = let d = n `divMod` 13
+               in Card (toEnum (fst d)) (toEnum (snd d))
+    fromEnum c = 13 * fromEnum(suit c) + fromEnum(rank c)
+
+instance Show Card where
+    show (Card s r) = (showRank r) ++ (showSuit s)
+
+newDeck = [(Card Clubs Ace) .. (Card Spades King)]
+
+suit :: Card -> Suit
+suit (Card s _) = s
+
+rank :: Card -> Rank
+rank (Card _ r) = r
+
+showSuit :: Suit -> String
+showSuit s = (take 1) (show s)
+
+showRank :: Rank -> String
+showRank f = (take 1) (drop (fromEnum f) "A23456789TJQK")
+
+sumNums :: (Integral b, RealFrac a) => a -> b
+sumNums n = round $ n/2 * (n+1)
+
+
+initializeGame :: [Card] -> GameState
+initializeGame deck = let ts = [(splitAt 1 $ fst $ splitAt (round x + 1)
+                                $ snd $ splitAt (sumNums x) deck)
+                                | x <- [0..6]]
+                          fs = [[], [], [], []]
+                          st = ([], snd $ splitAt (sumNums 7) deck)
+                 in GameState {tableaus=ts, foundations=fs,
+                               stock=st}
 
