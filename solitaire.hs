@@ -13,7 +13,7 @@ data Card = Card Suit Rank
 --{-
 data GameState = GameState { stock :: ([Card], [Card])
                            , tableaus :: [([Card],[Card])]
-                           , foundations :: [[Card]]
+                           , foundations :: [Card]
                            } deriving (Show)
 --}
 
@@ -47,7 +47,7 @@ initializeGame :: [Card] -> GameState
 initializeGame deck = let ts = [(splitAt 1 $ fst $ splitAt (round x + 1)
                                 $ snd $ splitAt (sumNums x) deck)
                                 | x <- [0..6]]
-                          fs = [[], [], [], []]
+                          fs = []
                           st = ([], snd $ splitAt (sumNums 7) deck)
                  in GameState {tableaus=ts, foundations=fs,
                                stock=st}
