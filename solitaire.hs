@@ -10,6 +10,12 @@ data Suit = Clubs | Diamonds | Hearts | Spades
 data Card = Card Suit Rank
             deriving (Eq, Ord, Bounded)
 
+otherSuit :: Suit -> Suit
+otherSuit Clubs = Spades
+otherSuit Spades = Clubs
+otherSuit Hearts = Diamonds
+otherSuit Diamonds = Hearts
+
 --{-
 data GameState = GameState { stock :: ([Card], [Card])
                            , tableaus :: [([Card],[Card])]
@@ -52,6 +58,12 @@ initializeGame deck = let ts = [(splitAt 1 $ fst $ splitAt (round x + 1)
                  in GameState {tableaus=ts, foundations=fs,
                                stock=st}
 
+onTableau :: Card -> Card -> Bool
+onTableau (Card suit1 rank1) (Card suit2 rank2) =
+    suit1 /= suit2 &&
+    otherSuit suit1 /= suit2 &&
+    succ rank1 == rank2
+
 flipStock up down = 
     (\(newUp,newDown) -> (reverse newUp ++ up, newDown)) $ splitAt 3 down
 
@@ -60,3 +72,10 @@ nextStock GameState {stock=(up, []), tableaus=ts, foundations=fs} =
     GameState {stock=flipStock [] $ reverse up, tableaus=ts, foundations=fs}
 nextStock GameState {stock=(up,down), tableaus=ts, foundations=fs} =
     GameState {stock=flipStock up down, tableaus=ts, foundations=fs}
+
+{-
+moveCard :: GameState -> Card -> Card -> GameState
+moveCard state card to
+    | card `elem` (fst $ stock GameState) =
+        
+--}
